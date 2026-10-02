@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Мои машины</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0d0d0d;
+    color: white;
+}
+
+header {
+    background: #181818;
+    padding: 25px;
+    text-align: center;
+    border-bottom: 2px solid #333;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 32px;
+}
+
+header p {
+    color: #aaa;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 25px;
+}
+
+.search {
+    width: 100%;
+    padding: 15px;
+    background: #202020;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 17px;
+    margin-bottom: 25px;
+}
+
+.add {
+    background: #e60000;
+    color: white;
+    border: none;
+    padding: 14px 22px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 25px;
+}
+
+.add:hover {
+    background: #ff2020;
+}
+
+.cars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.car {
+    background: #1b1b1b;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,.5);
+}
+
+.car img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+}
+
+.info {
+    padding: 18px;
+}
+
+.info h2 {
+    margin-top: 0;
+}
+
+.price {
+    color: #00e676;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.item {
+    margin-top: 10px;
+    color: #ccc;
+}
+
+.description {
+    margin-top: 15px;
+    line-height: 1.5;
+}
+
+.comment {
+    margin-top: 15px;
+    background: #292929;
+    padding: 12px;
+    border-radius: 8px;
+    color: #ccc;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.call,
+.map {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+}
+
+.call {
+    background: #12a84a;
+}
+
+.map {
+    background: #2864d7;
+}
+
+.delete {
+    width: 100%;
+    margin-top: 10px;
+    padding: 11px;
+    border: none;
+    border-radius: 8px;
+    background: #a00000;
+    color: white;
+    cursor: pointer;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.8);
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.form {
+    max-width: 600px;
+    margin: 30px auto;
+    background: #1b1b1b;
+    padding: 25px;
+    border-radius: 15px;
+}
+
+.form h2 {
+    margin-top: 0;
+}
+
+.form input,
+.form textarea {
+    width: 100%;
+    padding: 13px;
+    margin: 7px 0 15px;
+    background: #292929;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+.form textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+.save {
+    width: 100%;
+    padding: 14px;
+    background: #e60000;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.close {
+    float: right;
+    background: #444;
+    color: white;
+    border: none;
+    padding: 8px 13px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.preview {
+    display: none;
+    width: 100%;
+    max-height: 250px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+@media(max-width:600px) {
+    header h1 {
+        font-size: 25px;
+    }
+
+    .buttons {
+        flex-direction: column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🚗 МОИ МАШИНЫ</h1>
+    <p>Онлайн каталог автомобилей</p>
+</header>
+
+<div class="container">
+
+    <button class="add" onclick="openForm()">
+        ➕ Добавить машину
+    </button>
+
+    <input
+        class="search"
+        id="search"
+        placeholder="🔎 Найти машину..."
+        oninput="showCars()"
+    >
+
+    <div class="cars" id="cars"></div>
+
+</div>
+
+
+<!-- ФОРМА -->
+
+<div class="modal" id="modal">
+
+    <div class="form">
+
+        <button class="close" onclick="closeForm()">✕</button>
+
+        <h2>Добавить машину</h2>
+
+        <label>Название машины</label>
+        <input
+            id="name"
+            placeholder="Toyota Camry 2.0"
+        >
+
+        <label>Цена</label>
+        <input
+            id="price"
+            placeholder="25000"
+            type="number"
+        >
+
+        <label>Телефон</label>
+        <input
+            id="phone"
+            placeholder="+996 555 123 456"
+        >
+
+        <label>Местоположение</label>
+        <input
+            id="location"
+            placeholder="Бишкек, Кыргызстан"
+        >
+
+        <label>Описание</label>
+        <textarea
+            id="description"
+            placeholder="Описание автомобиля..."
+        ></textarea>
+
+        <label>Комментарий</label>
+        <textarea
+            id="comment"
+            placeholder="Ваш комментарий..."
+        ></textarea>
+
+        <label>Фотография машины</label>
+        <input
+            id="photo"
+            type="file"
+            accept="image/*"
+            onchange="previewPhoto()"
+        >
+
+        <img id="preview" class="preview">
+
+        <button class="save" onclick="addCar()">
+            🚗 Добавить машину
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let cars = JSON.parse(
+    localStorage.getItem("cars")
+) || [];
+
+
+function openForm() {
+    document.getElementById("modal").style.display = "block";
+}
+
+
+function closeForm() {
+    document.getElementById("modal").style.display = "none";
+}
+
+
+function previewPhoto() {
+
+    const file =
+        document.getElementById("photo").files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+
+        const preview =
+            document.getElementById("preview");
+
+        preview.src = e.target.result;
+        preview.style.display = "block";
+    };
+
+    reader.readAsDataURL(file);
+}
+
+
+function addCar() {
+
+    const name =
+        document.getElementById("name").value;
+
+    const price =
+        document.getElementById("price").value;
+
+    const phone =
+        document.getElementById("phone").value;
+
+    const location =
+        document.getElementById("location").value;
+
+    const description =
+        document.getElementById("description").value;
+
+    const comment =
+        document.getElementById("comment").value;
+
+    const file =
+        document.getElementById("photo").files[0];
+
+
+    if (
+        !name ||
+        !price ||
+        !phone ||
+        !location ||
+        !file
+    ) {
+
+        alert(
+            "Заполните название, цену, телефон, местоположение и фото!"
+        );
+
+        return;
+    }
+
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+
+        const car = {
+
+            id: Date.now(),
+
+            name: name,
+
+            price: price,
+
+            phone: phone,
+
+            location: location,
+
+            description: description,
+
+            comment: comment,
+
+            photo: e.target.result
+
+        };
+
+
+        cars.push(car);
+
+        localStorage.setItem(
+            "cars",
+            JSON.stringify(cars)
+        );
+
+
+        clearForm();
+
+        closeForm();
+
+        showCars();
+
+    };
+
+
+    reader.readAsDataURL(file);
+}
+
+
+function clearForm() {
+
+    document.getElementById("name").value = "";
+    document.getElementById("price").value = "";
+    document.getElementById("phone").value = "";
+    document.getElementById("location").value = "";
+    document.getElementById("description").value = "";
+    document.getElementById("comment").value = "";
+    document.getElementById("photo").value = "";
+
+    document.getElementById(
+        "preview"
+    ).style.display = "none";
+}
+
+
+function deleteCar(id) {
+
+    if (
+        confirm("Удалить эту машину?")
+    ) {
+
+        cars = cars.filter(
+            car => car.id !== id
+        );
+
+        localStorage.setItem(
+            "cars",
+            JSON.stringify(cars)
+        );
+
+        showCars();
+    }
+}
+
+
+function showCars() {
+
+    const container =
+        document.getElementById("cars");
+
+    const search =
+        document.getElementById("search")
+        .value
+        .toLowerCase();
+
+
+    container.innerHTML = "";
+
+
+    const filtered =
+        cars.filter(car =>
+            car.name
+                .toLowerCase()
+                .includes(search)
+        );
+
+
+    filtered.forEach(car => {
+
+        const phone =
+            car.phone.replace(
+                /[^\d+]/g,
+                ""
+            );
+
+
+        const map =
+            "https://www.google.com/maps/search/?api=1&query="
+            +
+            encodeURIComponent(
+                car.location
+            );
+
+
+        const card =
+            document.createElement("div");
+
+        card.className = "car";
+
+
+        card.innerHTML = `
+
+            <img
+                src="${car.photo}"
+                alt="${car.name}"
+            >
+
+            <div class="info">
+
+                <h2>
+                    ${car.name}
+                </h2>
+
+                <div class="price">
+                    💰 ${Number(car.price).toLocaleString()} $
+                </div>
+
+                <div class="item">
+                    📍 ${car.location}
+                </div>
+
+                <div class="item">
+                    📞 ${car.phone}
+                </div>
+
+                <div class="description">
+                    ${car.description}
+                </div>
+
+                <div class="comment">
+                    💬 ${car.comment}
+                </div>
+
+                <div class="buttons">
+
+                    <a
+                        class="call"
+                        href="tel:${phone}"
+                    >
+                        📞 Позвонить
+                    </a>
+
+                    <a
+                        class="map"
+                        href="${map}"
+                        target="_blank"
+                    >
+                        📍 Карта
+                    </a>
+
+                </div>
+
+                <button
+                    class="delete"
+                    onclick="deleteCar(${car.id})"
+                >
+                    🗑 Удалить
+                </button>
+
+            </div>
+        `;
+
+
+        container.appendChild(card);
+
+    });
+
+}
+
+
+showCars();
+
+</script>
+
+</body>
+</html>
